@@ -15,6 +15,9 @@ Flask = "==2.0.2"
 Jinja2 = "==3.0.3"
 MarkupSafe = "==2.0.1"
 Werkzeug = "==2.0.2"
+pandas = "*"
+dash = "*"
+dash-bootstrap-components = "*"
 
 [dev-packages]
 
