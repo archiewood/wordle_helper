@@ -1,17 +1,24 @@
 # this seems to be a file to put the routes in
+from msilib import Table
+from operator import concat
+from pydoc import classname
+from tkinter.ttk import Style
 import dash
-from dash import dcc, html, dash_table
+from dash import dcc, html, dash_table, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
+import logging
+from app.data_operations import *
 
 
-# @app.route("/")
-# def home_view():
-#     return "<h1>Welcome to Wordle Helper!</h1>"
-
-# dbc_css = ("https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.2/dbc.min.css")
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app = dash.Dash(__name__,
+                external_stylesheets=[dbc.themes.SUPERHERO],
+                meta_tags=[{"name": "viewport",
+                            "content": "width=device-width, initial-scale=1"}],
+                title="Wordle Companion",
+                update_title=None)
+app.css.config.serve_locally = True
 
 wordle_words = pd.read_csv('data/wordle_words.csv')
 word_frequency = pd.read_csv('data/unigram_freq.csv')
@@ -19,76 +26,165 @@ word_frequency = pd.read_csv('data/unigram_freq.csv')
 wordle_words = wordle_words.merge(
     word_frequency).sort_values(by='count', ascending=False)
 
+for n in range(0,5):
+  wordle_words['letter'+str(n)]=wordle_words.word.str[n]
+
+wordle_words.columns = ['word', 'frequency', 'letter0','letter1','letter2','letter3','letter4']
+
 
 app.layout = html.Div(
     children=[
         dbc.NavbarSimple(
-            brand="Wordle Helper",
+            brand="Wordle Companion",
             brand_href="#",
             color="primary",
-            dark=True
+            dark=True,
+            className="mb-4"
+
         ),
         dbc.Container(
             [
                 dbc.Row(
 
                     dbc.Col(children=[
-                        html.Br(),
-                        
-                        html.Div(children='Beat your friends at Wordle.')],width=6),
-                        justify='center'
-                ),
-                dbc.Row(
-                    children=[
-                        html.Div(children='Enter your first guess:'),
+                        html.H3(children='Beat your friends at Wordle.'),
+                    ], width='auto', class_name='mb-3'),
 
-                        html.Br(),
-                        dbc.Col(dbc.Input(id='letter0', placeholder='a',
-                                          type='text', size="lg", className="mb-3", maxlength=1),width={"size": 1}), 
-                        dbc.Col(dbc.Input(id='letter1', placeholder='a',
-                                          type='text', size="lg", className="mb-3", maxlength=1),width={"size": 1}),
-                        dbc.Col(dbc.Input(id='letter2', placeholder='a',
-                                          type='text', size="lg", className="mb-3", maxlength=1),width={"size": 1}),
-                        dbc.Col(dbc.Input(id='letter3', placeholder='a',
-                                          type='text', size="lg", className="mb-3", maxlength=1),width={"size": 1}),
-                        dbc.Col(dbc.Input(id='letter4', placeholder='a',
-                                          type='text', size="lg", className="mb-3", maxlength=1),width={"size": 1})
-                    ],
                     justify='center'
+
+                ),
+                dbc.Row(html.H4(children='First Guess', className='mb-1')),
+                dbc.Row(html.Div(
+                    children='Enter your word, and the color for each letter (lowercase)', className='mb-1')),
+                dbc.Row(
+                    children=[
+                        dbc.Col(dbc.Input(id='letter0', placeholder='_',
+                                          type='text', size="lg", maxlength=1),),
+                        dbc.Col(dbc.Input(id='letter1', placeholder='_',
+                                          type='text', size="lg", maxlength=1),),
+                        dbc.Col(dbc.Input(id='letter2', placeholder='_',
+                                          type='text', size="lg", maxlength=1),),
+                        dbc.Col(dbc.Input(id='letter3', placeholder='_',
+                                          type='text', size="lg", maxlength=1),),
+                        dbc.Col(dbc.Input(id='letter4', placeholder='_',
+                                          type='text', size="lg", maxlength=1),)
+                    ],
+                    justify='between', class_name='mb-1 g-2'
                 ),
                 dbc.Row(
                     children=[
-                        html.Div(children='Select the colour of each letter:'),
                         html.Br(),
-                        dbc.Col(dbc.DropdownMenu(id='result0',
-                                                 label="Result",
-                                                 children=[dbc.DropdownMenuItem("Green"), dbc.DropdownMenuItem("Yellow"), dbc.DropdownMenuItem("Grey")],),width={"size": 1}),
-                        dbc.Col(dbc.DropdownMenu(id='result1',
-                                                 label="Result",
-                                                 children=[dbc.DropdownMenuItem("Green"), dbc.DropdownMenuItem("Yellow"), dbc.DropdownMenuItem("Grey")],),width={"size": 1}),
-                        dbc.Col(dbc.DropdownMenu(id='result2',
-                                                 label="Result",
-                                                 children=[dbc.DropdownMenuItem("Green"), dbc.DropdownMenuItem("Yellow"), dbc.DropdownMenuItem("Grey")],),width={"size": 1}),
-                        dbc.Col(dbc.DropdownMenu(id='result3',
-                                                 label="Result",
-                                                 children=[dbc.DropdownMenuItem("Green"), dbc.DropdownMenuItem("Yellow"), dbc.DropdownMenuItem("Grey")],),width={"size": 1}),
-                        dbc.Col(dbc.DropdownMenu(id='result4',
-                                                 label="Result",
-                                                 children=[dbc.DropdownMenuItem("Green"), dbc.DropdownMenuItem("Yellow"), dbc.DropdownMenuItem("Grey")],),width={"size": 1}),
+                        dbc.Col(dcc.Dropdown(id='result0select',
+                                             options=[
+                                                 {'label': 'Green',
+                                                     'value': 'Green'},
+                                                 {'label': 'Yellow',
+                                                     'value': 'Yellow'},
+                                                 {'label': 'Grey', 'value': 'Grey'}],
+                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False,optionHeight=50),),
+                        dbc.Col(dcc.Dropdown(id='result1select',
+                                             options=[
+                                                 {'label': 'Green',
+                                                     'value': 'Green'},
+                                                 {'label': 'Yellow',
+                                                     'value': 'Yellow'},
+                                                 {'label': 'Grey', 'value': 'Grey'}],
+                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False)),
+                        dbc.Col(dcc.Dropdown(id='result2select',
+                                             options=[
+                                                 {'label': 'Green',
+                                                     'value': 'Green'},
+                                                 {'label': 'Yellow',
+                                                  'value': 'Yellow'},
+                                                 {'label': 'Grey', 'value': 'Grey'}],
+                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False)),
+                        dbc.Col(dcc.Dropdown(id='result3select',
+                                             options=[
+                                                 {'label': 'Green',
+                                                     'value': 'Green'},
+                                                 {'label': 'Yellow',
+                                                  'value': 'Yellow'},
+                                                 {'label': 'Grey', 'value': 'Grey'}],
+                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False)),
+                        dbc.Col(dcc.Dropdown(id='result4select',
+                                             options=[
+                                                 {'label': 'Green',
+                                                     'value': 'Green'},
+                                                 {'label': 'Yellow',
+                                                  'value': 'Yellow'},
+                                                 {'label': 'Grey', 'value': 'Grey'}],
+                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False))
                     ],
-                    justify='center'
+                    justify='center', class_name='mb-5 g-2'
                 ),
+
                 dbc.Row(
-                    dbc.Col(
-                        dbc.Table.from_dataframe(
-                            wordle_words.head(),
-                            id='table',
-                            striped=True, bordered=True, hover=True
-                        )))
+                    dbc.Col(children=[
+                        html.H5('Remaining Words'),
+                        dbc.Alert([
+                            html.H4(format(wordle_words.shape[0], ','),id='num_words_remaining'),
+                            html.P(" possible words remaining")], color="secondary"),
+                        html.Div(id='table1')
+                    ]
+                    )),
 
             ],
-            fluid=False,
+            fluid='sm',
+
             className="dbc"
         )
     ]
 )
+
+# @app.callback(
+#     Output("example-output", "children"), [Input("example-button", "n_clicks")]
+# )
+
+
+@app.callback(
+    Output('table1', 'children'), 
+    Input('letter0', 'value'),
+    Input('letter1', 'value'),
+    Input('letter2', 'value'),
+    Input('letter3', 'value'),
+    Input('letter4', 'value'),
+    Input('result0select', 'value'),
+    Input('result1select', 'value'),
+    Input('result2select', 'value'),
+    Input('result3select', 'value'),
+    Input('result4select', 'value'),
+    )
+def update_table(letter0,letter1,letter2,letter3,letter4,result0,result1,result2,result3,result4):
+    try:
+        guess=letter0+letter1+letter2+letter3+letter4
+    except:
+        return dbc.Table.from_dataframe(wordle_words.head(10))
+    logging.info('validated guess')
+    result=[result0,result1,result2,result3,result4]
+    filtered_df=update_possible_words(wordle_words,guess,result)
+    return dbc.Table.from_dataframe(filtered_df)
+    
+
+@app.callback(
+    Output('num_words_remaining', 'children'), 
+    Input('letter0', 'value'),
+    Input('letter1', 'value'),
+    Input('letter2', 'value'),
+    Input('letter3', 'value'),
+    Input('letter4', 'value'),
+    Input('result0select', 'value'),
+    Input('result1select', 'value'),
+    Input('result2select', 'value'),
+    Input('result3select', 'value'),
+    Input('result4select', 'value'),
+    )
+def update_table(letter0,letter1,letter2,letter3,letter4,result0,result1,result2,result3,result4):
+    try:
+        guess=letter0+letter1+letter2+letter3+letter4
+    except:
+        return format(wordle_words.shape[0], ',')
+    logging.info('validated guess')
+    result=[result0,result1,result2,result3,result4]
+    filtered_df=update_possible_words(wordle_words,guess,result)
+    return format(filtered_df.shape[0], ',')
+    

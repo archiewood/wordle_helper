@@ -18,6 +18,7 @@ Werkzeug = "==2.0.2"
 pandas = "*"
 dash = "*"
 dash-bootstrap-components = "*"
+waitress = "*"
 
 [dev-packages]
 
