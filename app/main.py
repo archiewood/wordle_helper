@@ -14,6 +14,7 @@ app = dash.Dash(__name__,
                             "content": "width=device-width, initial-scale=1"}],
                 title="Wordle Companion",
                 update_title=None)
+server = app.server
 app.css.config.serve_locally = True
 
 wordle_words = pd.read_csv('data/wordle_words.csv')
