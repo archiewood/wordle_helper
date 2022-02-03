@@ -14,7 +14,7 @@ app = dash.Dash(__name__,
                             "content": "width=device-width, initial-scale=1"}],
                 title="Wordle Companion",
                 update_title=None)
-server = app.server
+
 app.css.config.serve_locally = True
 
 wordle_words = pd.read_csv('data/wordle_words.csv')
@@ -45,7 +45,7 @@ app.layout = html.Div(
                 dbc.Row(
 
                     dbc.Col(children=[
-                        html.H3(children='Beat your friends at Wordle.'),
+                        html.H3(children='Beat your friends at Wordle'),
                     ], width='auto', class_name='mb-3'),
 
                     justify='center'
