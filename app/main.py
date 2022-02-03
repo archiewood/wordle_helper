@@ -26,10 +26,11 @@ word_frequency = pd.read_csv('data/unigram_freq.csv')
 wordle_words = wordle_words.merge(
     word_frequency).sort_values(by='count', ascending=False)
 
-for n in range(0,5):
-  wordle_words['letter'+str(n)]=wordle_words.word.str[n]
+for n in range(0, 5):
+    wordle_words['letter'+str(n)] = wordle_words.word.str[n]
 
-wordle_words.columns = ['word', 'frequency', 'letter0','letter1','letter2','letter3','letter4']
+wordle_words.columns = ['word', 'frequency', 'letter0',
+    'letter1', 'letter2', 'letter3', 'letter4']
 
 
 app.layout = html.Div(
@@ -81,7 +82,7 @@ app.layout = html.Div(
                                                  {'label': 'Yellow',
                                                      'value': 'Yellow'},
                                                  {'label': 'Grey', 'value': 'Grey'}],
-                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False,optionHeight=50),),
+                                             value='', className='dbc', placeholder='Pick', searchable=False, optionHeight=50),),
                         dbc.Col(dcc.Dropdown(id='result1select',
                                              options=[
                                                  {'label': 'Green',
@@ -89,7 +90,7 @@ app.layout = html.Div(
                                                  {'label': 'Yellow',
                                                      'value': 'Yellow'},
                                                  {'label': 'Grey', 'value': 'Grey'}],
-                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False)),
+                                             value='', className='dbc', placeholder='Pick', searchable=False)),
                         dbc.Col(dcc.Dropdown(id='result2select',
                                              options=[
                                                  {'label': 'Green',
@@ -97,7 +98,7 @@ app.layout = html.Div(
                                                  {'label': 'Yellow',
                                                   'value': 'Yellow'},
                                                  {'label': 'Grey', 'value': 'Grey'}],
-                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False)),
+                                             value='', className='dbc', placeholder='Pick', searchable=False)),
                         dbc.Col(dcc.Dropdown(id='result3select',
                                              options=[
                                                  {'label': 'Green',
@@ -105,7 +106,7 @@ app.layout = html.Div(
                                                  {'label': 'Yellow',
                                                   'value': 'Yellow'},
                                                  {'label': 'Grey', 'value': 'Grey'}],
-                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False)),
+                                             value='', className='dbc', placeholder='Pick', searchable=False)),
                         dbc.Col(dcc.Dropdown(id='result4select',
                                              options=[
                                                  {'label': 'Green',
@@ -113,7 +114,7 @@ app.layout = html.Div(
                                                  {'label': 'Yellow',
                                                   'value': 'Yellow'},
                                                  {'label': 'Grey', 'value': 'Grey'}],
-                                             value='', className='dbc',placeholder='Pick',clearable=False,searchable=False))
+                                             value='', className='dbc', placeholder='Pick', searchable=False))
                     ],
                     justify='center', class_name='mb-5 g-2'
                 ),
@@ -122,7 +123,8 @@ app.layout = html.Div(
                     dbc.Col(children=[
                         html.H5('Remaining Words'),
                         dbc.Alert([
-                            html.H4(format(wordle_words.shape[0], ','),id='num_words_remaining'),
+                            html.H4(
+                                format(wordle_words.shape[0], ','), id='num_words_remaining'),
                             html.P(" possible words remaining")], color="secondary"),
                         html.Div(id='table1')
                     ]
@@ -142,7 +144,7 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output('table1', 'children'), 
+    Output('table1', 'children'),
     Input('letter0', 'value'),
     Input('letter1', 'value'),
     Input('letter2', 'value'),
@@ -153,20 +155,17 @@ app.layout = html.Div(
     Input('result2select', 'value'),
     Input('result3select', 'value'),
     Input('result4select', 'value'),
-    )
-def update_table(letter0,letter1,letter2,letter3,letter4,result0,result1,result2,result3,result4):
-    try:
-        guess=letter0+letter1+letter2+letter3+letter4
-    except:
-        return dbc.Table.from_dataframe(wordle_words.head(10))
-    logging.info('validated guess')
-    result=[result0,result1,result2,result3,result4]
-    filtered_df=update_possible_words(wordle_words,guess,result)
-    return dbc.Table.from_dataframe(filtered_df)
-    
+)
+def update_table(letter0, letter1, letter2, letter3, letter4, result0, result1, result2, result3, result4):
+    if result0=='': return None
+    guess= str(letter0)+str(letter1)+str(letter2)+str(letter3)+str(letter4)
+    result = [result0,result1,result2,result3,result4]
+    filtered_df = update_possible_words(wordle_words,guess,result)
+    return dbc.Table.from_dataframe(filtered_df.iloc[:,0:2].head(100))
+
 
 @app.callback(
-    Output('num_words_remaining', 'children'), 
+    Output('num_words_remaining', 'children'),
     Input('letter0', 'value'),
     Input('letter1', 'value'),
     Input('letter2', 'value'),
@@ -177,14 +176,9 @@ def update_table(letter0,letter1,letter2,letter3,letter4,result0,result1,result2
     Input('result2select', 'value'),
     Input('result3select', 'value'),
     Input('result4select', 'value'),
-    )
-def update_table(letter0,letter1,letter2,letter3,letter4,result0,result1,result2,result3,result4):
-    try:
-        guess=letter0+letter1+letter2+letter3+letter4
-    except:
-        return format(wordle_words.shape[0], ',')
-    logging.info('validated guess')
-    result=[result0,result1,result2,result3,result4]
-    filtered_df=update_possible_words(wordle_words,guess,result)
+)
+def update_table(letter0, letter1,letter2,letter3,letter4,result0,result1,result2,result3,result4):
+    guess= str(letter0)+str(letter1)+str(letter2)+str(letter3)+str(letter4)
+    result = [result0,result1,result2,result3,result4]
+    filtered_df = update_possible_words(wordle_words,guess,result)
     return format(filtered_df.shape[0], ',')
-    
