@@ -15,7 +15,7 @@ def update_possible_words(word_list, guess, result):
 
 
 def exclude_letter(word_list, letter):
-    post_filter = word_list[word_list.word.str.contains(letter) == False]
+    post_filter = word_list[word_list.Word.str.contains(letter) == False]
     return post_filter
 
 
@@ -27,7 +27,7 @@ def exclude_multiple_letters(word_list, letters):
 
 
 def require_letter(word_list, letter):
-    post_filter = word_list[word_list.word.str.contains(letter) == True]
+    post_filter = word_list[word_list.Word.str.contains(letter) == True]
     return post_filter
 
 
