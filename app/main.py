@@ -1,6 +1,7 @@
 # this seems to be a file to put the routes in
+from click import style
 import dash
-from dash import dcc, html, dash_table, Input, Output
+from dash import dcc, html, dash_table, Input, Output, State, MATCH, ALL
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
@@ -19,6 +20,44 @@ app.css.config.serve_locally = True
 
 wordle_words = pd.read_csv(
     'data/wordle_words.csv').sort_values(by='Frequency', ascending=False)
+
+
+def create_guess_input(guess_number):
+    return dbc.Col(
+        children=[
+            dbc.Row(
+                html.H4(children='Guess '+str(guess_number), className='mb-1')),
+                html.H6(' (Optional)') if guess_number>1 else 'Enter your word, and the color for each letter below',
+
+            dbc.Row(
+                children=[
+                    #dbc.Col(dbc.Input(id='letter'+str(i)+'_guess'+str(guess_number), placeholder='A',
+                    dbc.Col(dbc.Input(id={'component':'guess_input','letter_position':i, 'guess_number':guess_number}, placeholder='A',
+                                      type='text', size="lg", maxlength=1,value='',)) for i in range(5)
+                ],
+                justify='between', class_name='mb-1 g-2'
+            ),
+
+            dbc.Row(
+                children=[
+
+                    dbc.Col(dcc.Dropdown(id={'component': 'result_selector', 'letter_position': i, 'guess_number': guess_number},
+                    #dbc.Col(dcc.Dropdown(id='result'+str(i)+'select_guess'+str(guess_number),
+
+                                         options=[
+                            {'label': 'Green',
+                             'value': 'Green'},
+                            {'label': 'Yellow',
+                             'value': 'Yellow'},
+                            {'label': 'Grey', 'value': 'Grey'}],
+                        value='', className='dbc', placeholder='Pick', searchable=False)) for i in range(5)
+                ],
+                justify='center', class_name='mb-5 g-2'
+            )
+        ],
+        #class_name='col-12 col-md-6'
+    )
+
 
 app.layout = html.Div(
     children=[
@@ -41,80 +80,64 @@ app.layout = html.Div(
                     justify='center'
                 ),
 
-                dbc.Row(children=[
-                    dbc.Col(
-                        children=[
-                            dbc.Row(
-                                html.H4(children='First Guess', className='mb-1')),
-                            dbc.Row(html.Div(
-                                children='Enter your word, and the color for each letter below', className='mb-1')),
-                            dbc.Row(
-                                children=[
-                                    dbc.Col(dbc.Input(id='letter'+str(i), placeholder='_',
-                                                      type='text', size="lg", maxlength=1),) for i in range(5)
-                                ],
-                                justify='between', class_name='mb-1 g-2'
-                            ),
+                dbc.Row(
+                    children=[
+                        dbc.Col(
+                            children=[
+                                create_guess_input(i) for i in range(1,4)], 
+                                class_name='col-12 col-md-6'),
 
-                            dbc.Row(
-                                children=[
-
-                                    dbc.Col(dcc.Dropdown(id='result'+str(i)+'select',
-                                                         options=[
-                                                             {'label': 'Green',
-                                                              'value': 'Green'},
-                                                             {'label': 'Yellow',
-                                                              'value': 'Yellow'},
-                                                             {'label': 'Grey', 'value': 'Grey'}],
-                                                         value='', className='dbc', placeholder='Pick', searchable=False)) for i in range(5)
-                                ],
-                                justify='center', class_name='mb-5 g-2'
-                            )],
-
-
-                        class_name='col-12 col-md-6'
-                    ),
-
-                    dbc.Col(
-                        children=[html.H4('Remaining Words'),
-                                  dbc.Alert([
-                                      html.H4(
-                                          format(wordle_words.shape[0], ','), id='num_words_remaining'),
-                                      html.P(" possible words remaining")], color="secondary"),
-                                  html.Div(id='table1')
-                                  ],
-                        class_name='col-12 col-md-6'
-                    ),
-                ]),
+                        dbc.Col(
+                            children=[html.H4('Remaining Words'),
+                                      dbc.Alert([
+                                          html.H4(
+                                              format(wordle_words.shape[0], ','), id='num_words_remaining'),
+                                          html.P(" possible words remaining")], color="secondary"),
+                                      html.Div(id='table1')
+                                      ],
+                            class_name='col-12 col-md-6'
+                        ),
+                    ]),
 
 
             ],
             fluid='sm',
 
-            className="dbc"
+            className="dbc col-12 col-sm-8"
         )
     ]
 )
 
+@app.callback(
+    Output({'component':'guess_input', 'letter_position': MATCH, 'guess_number': MATCH},'style'),
+    Input({'component':'result_selector', 'letter_position': MATCH, 'guess_number': MATCH},'value')
+)
+def update_color(result_selector):
+    if result_selector=='': 
+        return {'background-color':result_selector,'color':'black'}
+    elif result_selector=='Green':
+        return {'background-color':'#6aaa64','color':'white'}
+    elif result_selector=='Yellow':
+        return {'background-color':'#c9b458','color':'white'}
+    elif result_selector=='Grey':
+        return {'background-color':'#86888a','color':'white'}  
 
+
+
+#currently only connected to guess 1, needs to be updated
 @ app.callback(
     [Output('table1', 'children'), Output('num_words_remaining', 'children')],
-    [Input('letter0', 'value'),
-     Input('letter1', 'value'),
-     Input('letter2', 'value'),
-     Input('letter3', 'value'),
-     Input('letter4', 'value'),
-     Input('result0select', 'value'),
-     Input('result1select', 'value'),
-     Input('result2select', 'value'),
-     Input('result3select', 'value'),
-     Input('result4select', 'value')]
+    [Input({'component':'guess_input', 'letter_position': ALL, 'guess_number': 1},'value'),
+     Input({'component':'result_selector', 'letter_position': ALL, 'guess_number': 1},'value')]
 )
-def update_words_remaining(letter0, letter1, letter2, letter3, letter4, result0, result1, result2, result3, result4):
-    if result0 == '':
-        return [None, format(wordle_words.shape[0], ',')]
-    guess=(str(letter0)+str(letter1)+str(letter2) +
-             str(letter3)+str(letter4)).lower()
-    result=[result0, result1, result2, result3, result4]
-    filtered_df=update_possible_words(wordle_words, guess, result)
+def update_words_remaining(guess_input,result_selector):
+    guess = []
+    for letter in guess_input:
+        if letter == '':
+            guess.append('*')
+        else:
+            guess.append(letter.lower())
+    
+    filtered_df = update_possible_words(wordle_words, guess, result_selector)
     return [dbc.Table.from_dataframe(filtered_df.iloc[:, 0:1].head(100)), format(filtered_df.shape[0], ',')]
+
