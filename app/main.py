@@ -50,65 +50,28 @@ app.layout = html.Div(
                                 children='Enter your word, and the color for each letter below', className='mb-1')),
                             dbc.Row(
                                 children=[
-                                    dbc.Col(dbc.Input(id='letter0', placeholder='_',
-                                                      type='text', size="lg", maxlength=1, autofocus=True),),
-                                    dbc.Col(dbc.Input(id='letter1', placeholder='_',
-                                                      type='text', size="lg", maxlength=1),),
-                                    dbc.Col(dbc.Input(id='letter2', placeholder='_',
-                                                      type='text', size="lg", maxlength=1),),
-                                    dbc.Col(dbc.Input(id='letter3', placeholder='_',
-                                                      type='text', size="lg", maxlength=1),),
-                                    dbc.Col(dbc.Input(id='letter4', placeholder='_',
-                                                      type='text', size="lg", maxlength=1),)
+                                    dbc.Col(dbc.Input(id='letter'+str(i), placeholder='_',
+                                                      type='text', size="lg", maxlength=1),) for i in range(5)
                                 ],
                                 justify='between', class_name='mb-1 g-2'
                             ),
+
                             dbc.Row(
                                 children=[
-                                    html.Br(),
-                                    dbc.Col(dcc.Dropdown(id='result0select',
+
+                                    dbc.Col(dcc.Dropdown(id='result'+str(i)+'select',
                                                          options=[
                                                              {'label': 'Green',
                                                               'value': 'Green'},
                                                              {'label': 'Yellow',
                                                               'value': 'Yellow'},
                                                              {'label': 'Grey', 'value': 'Grey'}],
-                                                         value='', className='dbc', placeholder='Pick', searchable=False, optionHeight=50),),
-                                    dbc.Col(dcc.Dropdown(id='result1select',
-                                                         options=[
-                                                             {'label': 'Green',
-                                                              'value': 'Green'},
-                                                             {'label': 'Yellow',
-                                                              'value': 'Yellow'},
-                                                             {'label': 'Grey', 'value': 'Grey'}],
-                                                         value='', className='dbc', placeholder='Pick', searchable=False)),
-                                    dbc.Col(dcc.Dropdown(id='result2select',
-                                                         options=[
-                                                             {'label': 'Green',
-                                                              'value': 'Green'},
-                                                             {'label': 'Yellow',
-                                                              'value': 'Yellow'},
-                                                             {'label': 'Grey', 'value': 'Grey'}],
-                                                         value='', className='dbc', placeholder='Pick', searchable=False)),
-                                    dbc.Col(dcc.Dropdown(id='result3select',
-                                                         options=[
-                                                             {'label': 'Green',
-                                                              'value': 'Green'},
-                                                             {'label': 'Yellow',
-                                                              'value': 'Yellow'},
-                                                             {'label': 'Grey', 'value': 'Grey'}],
-                                                         value='', className='dbc', placeholder='Pick', searchable=False)),
-                                    dbc.Col(dcc.Dropdown(id='result4select',
-                                                         options=[
-                                                             {'label': 'Green',
-                                                              'value': 'Green'},
-                                                             {'label': 'Yellow',
-                                                              'value': 'Yellow'},
-                                                             {'label': 'Grey', 'value': 'Grey'}],
-                                                         value='', className='dbc', placeholder='Pick', searchable=False))
+                                                         value='', className='dbc', placeholder='Pick', searchable=False)) for i in range(5)
                                 ],
                                 justify='center', class_name='mb-5 g-2'
                             )],
+
+
                         class_name='col-12 col-md-6'
                     ),
 
@@ -150,8 +113,8 @@ app.layout = html.Div(
 def update_words_remaining(letter0, letter1, letter2, letter3, letter4, result0, result1, result2, result3, result4):
     if result0 == '':
         return [None, format(wordle_words.shape[0], ',')]
-    guess = (str(letter0)+str(letter1)+str(letter2) +
+    guess=(str(letter0)+str(letter1)+str(letter2) +
              str(letter3)+str(letter4)).lower()
-    result = [result0, result1, result2, result3, result4]
-    filtered_df = update_possible_words(wordle_words, guess, result)
+    result=[result0, result1, result2, result3, result4]
+    filtered_df=update_possible_words(wordle_words, guess, result)
     return [dbc.Table.from_dataframe(filtered_df.iloc[:, 0:1].head(100)), format(filtered_df.shape[0], ',')]
