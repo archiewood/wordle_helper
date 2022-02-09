@@ -29,7 +29,7 @@ def create_guess_input(guess_number):
                 html.Div(children=[
                     html.H4(children=['Guess '+str(guess_number)],
                             className='mb-1'),
-                    html.H6(' (Optional)') if guess_number > 1 else html.H5(' Enter your word, and the color for each letter below')],className='mb-1'
+                    html.H6(' (Optional)') if guess_number > 1 else None], className='mb-1'
                 ),
 
             ], ),
@@ -55,7 +55,7 @@ def create_guess_input(guess_number):
                             {'label': 'Yellow',
                              'value': 'Yellow'},
                             {'label': 'Grey', 'value': 'Grey'}],
-                        value='', className='dbc', placeholder='Pick', searchable=False, clearable=False)) for i in range(5)
+                        value='', className='dbc', placeholder='', searchable=False, clearable=False)) for i in range(5)
                 ],
                 justify='center', class_name='mb-3 g-2'
             )
@@ -84,16 +84,27 @@ app.layout = html.Div(
 
                     justify='center'
                 ),
+                dbc.Row(
+
+                    dbc.Col(children=[
+                        html.P(
+                            children='Enter your word guesses and color for each letter below, to show which words are still possible.'),
+                    ], width='auto', class_name='mb-3'),
+
+                    justify='center'
+                ),
 
                 dbc.Row(
                     children=[
+
                         dbc.Col(
                             children=[
                                 create_guess_input(i) for i in range(1, 6)],
                             class_name='col-12 col-md-6'),
 
                         dbc.Col(
-                            children=[dbc.Row(html.H4('Remaining Words'),className='mb-2'),
+                            children=[
+                                dbc.Row(html.Div([html.H4('Remaining Words'), html.H6(' (Top 50 Shown)')]), className='mb-2'),
                                       dbc.Alert([
                                           html.H4(
                                               format(wordle_words.shape[0], ','), id='num_words_remaining'),
