@@ -62,3 +62,6 @@ Defines the .dbc class
     border-color: rgba(var(--bs-primary-rgb), 0.6) !important;
   }
   
+  h4, h6 {
+    display: inline;
+  }

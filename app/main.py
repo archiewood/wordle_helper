@@ -25,15 +25,20 @@ wordle_words = pd.read_csv(
 def create_guess_input(guess_number):
     return dbc.Col(
         children=[
-            dbc.Row(
-                html.H4(children='Guess '+str(guess_number), className='mb-1')),
-                html.H6(' (Optional)') if guess_number>1 else 'Enter your word, and the color for each letter below',
+            dbc.Row(children=[
+                html.Div(children=[
+                    html.H4(children=['Guess '+str(guess_number)],
+                            className='mb-1'),
+                    html.H6(' (Optional)') if guess_number > 1 else html.H5(' Enter your word, and the color for each letter below')],className='mb-1'
+                ),
+
+            ], ),
 
             dbc.Row(
                 children=[
-                    #dbc.Col(dbc.Input(id='letter'+str(i)+'_guess'+str(guess_number), placeholder='A',
-                    dbc.Col(dbc.Input(id={'component':'guess_input','letter_position':i, 'guess_number':guess_number}, placeholder='A',
-                                      type='text', size="lg", maxlength=1,value='',)) for i in range(5)
+                    # dbc.Col(dbc.Input(id='letter'+str(i)+'_guess'+str(guess_number), placeholder='A',
+                    dbc.Col(dbc.Input(id={'component': 'guess_input', 'letter_position': i, 'guess_number': guess_number}, placeholder='A',
+                                      type='text', size="lg", maxlength=1, value='',)) for i in range(5)
                 ],
                 justify='between', class_name='mb-1 g-2'
             ),
@@ -42,7 +47,7 @@ def create_guess_input(guess_number):
                 children=[
 
                     dbc.Col(dcc.Dropdown(id={'component': 'result_selector', 'letter_position': i, 'guess_number': guess_number},
-                    #dbc.Col(dcc.Dropdown(id='result'+str(i)+'select_guess'+str(guess_number),
+                                         # dbc.Col(dcc.Dropdown(id='result'+str(i)+'select_guess'+str(guess_number),
 
                                          options=[
                             {'label': 'Green',
@@ -50,9 +55,9 @@ def create_guess_input(guess_number):
                             {'label': 'Yellow',
                              'value': 'Yellow'},
                             {'label': 'Grey', 'value': 'Grey'}],
-                        value='', className='dbc', placeholder='Pick', searchable=False)) for i in range(5)
+                        value='', className='dbc', placeholder='Pick', searchable=False, clearable=False)) for i in range(5)
                 ],
-                justify='center', class_name='mb-5 g-2'
+                justify='center', class_name='mb-3 g-2'
             )
         ],
         #class_name='col-12 col-md-6'
@@ -84,11 +89,11 @@ app.layout = html.Div(
                     children=[
                         dbc.Col(
                             children=[
-                                create_guess_input(i) for i in range(1,4)], 
-                                class_name='col-12 col-md-6'),
+                                create_guess_input(i) for i in range(1, 6)],
+                            class_name='col-12 col-md-6'),
 
                         dbc.Col(
-                            children=[html.H4('Remaining Words'),
+                            children=[dbc.Row(html.H4('Remaining Words'),className='mb-2'),
                                       dbc.Alert([
                                           html.H4(
                                               format(wordle_words.shape[0], ','), id='num_words_remaining'),
@@ -108,36 +113,39 @@ app.layout = html.Div(
     ]
 )
 
+
 @app.callback(
-    Output({'component':'guess_input', 'letter_position': MATCH, 'guess_number': MATCH},'style'),
-    Input({'component':'result_selector', 'letter_position': MATCH, 'guess_number': MATCH},'value')
+    Output({'component': 'guess_input', 'letter_position': MATCH,
+           'guess_number': MATCH}, 'style'),
+    Input({'component': 'result_selector',
+          'letter_position': MATCH, 'guess_number': MATCH}, 'value')
 )
 def update_color(result_selector):
-    if result_selector=='': 
-        return {'background-color':result_selector,'color':'black'}
-    elif result_selector=='Green':
-        return {'background-color':'#6aaa64','color':'white'}
-    elif result_selector=='Yellow':
-        return {'background-color':'#c9b458','color':'white'}
-    elif result_selector=='Grey':
-        return {'background-color':'#86888a','color':'white'}  
+    if result_selector == '':
+        return {'background-color': result_selector, 'color': 'black'}
+    elif result_selector == 'Green':
+        return {'background-color': '#6aaa64', 'color': 'white'}
+    elif result_selector == 'Yellow':
+        return {'background-color': '#c9b458', 'color': 'white'}
+    elif result_selector == 'Grey':
+        return {'background-color': '#86888a', 'color': 'white'}
 
 
-
-#currently only connected to guess 1, needs to be updated
+# currently only connected to guess 1, needs to be updated
 @ app.callback(
     [Output('table1', 'children'), Output('num_words_remaining', 'children')],
-    [Input({'component':'guess_input', 'letter_position': ALL, 'guess_number': 1},'value'),
-     Input({'component':'result_selector', 'letter_position': ALL, 'guess_number': 1},'value')]
+    [Input({'component': 'guess_input', 'letter_position': ALL, 'guess_number': ALL}, 'value'),
+     Input({'component': 'result_selector', 'letter_position': ALL, 'guess_number': ALL}, 'value')]
 )
-def update_words_remaining(guess_input,result_selector):
+def update_words_remaining(guess_input, result_selector):
+    current_word_list = wordle_words
+
     guess = []
     for letter in guess_input:
         if letter == '':
             guess.append('*')
         else:
             guess.append(letter.lower())
-    
-    filtered_df = update_possible_words(wordle_words, guess, result_selector)
-    return [dbc.Table.from_dataframe(filtered_df.iloc[:, 0:1].head(100)), format(filtered_df.shape[0], ',')]
 
+    filtered_df = update_possible_words(wordle_words, guess, result_selector)
+    return [dbc.Table.from_dataframe(filtered_df.iloc[:, 0:1].head(50)), format(filtered_df.shape[0], ',')]
