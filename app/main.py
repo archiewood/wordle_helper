@@ -10,7 +10,7 @@ from app.data_operations import *
 
 
 app = dash.Dash(__name__,
-                external_stylesheets=[dbc.themes.SUPERHERO],
+                external_stylesheets=[dbc.themes.YETI],
                 meta_tags=[{"name": "viewport",
                             "content": "width=device-width, initial-scale=1"}],
                 title="Wordle Companion",
@@ -67,7 +67,7 @@ def create_guess_input(guess_number):
 app.layout = html.Div(
     children=[
         dbc.NavbarSimple(
-            brand="Wordle Companion",
+            brand="WORDLE COMPANION",
             brand_href="#",
             color="primary",
             dark=True,
