@@ -19,7 +19,7 @@ app = dash.Dash(__name__,
 app.css.config.serve_locally = True
 
 wordle_words = pd.read_csv(
-    'data/wordle_words.csv').sort_values(by='Frequency', ascending=False)
+    'data/wordle_words_short.csv').sort_values(by='Frequency', ascending=False)
 
 
 def create_guess_input(guess_number):
