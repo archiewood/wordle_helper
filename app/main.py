@@ -10,13 +10,42 @@ from app.data_operations import *
 
 
 app = dash.Dash(__name__,
-                external_stylesheets=[dbc.themes.YETI],
+                external_stylesheets=[dbc.themes.SANDSTONE],
                 meta_tags=[{"name": "viewport",
                             "content": "width=device-width, initial-scale=1"}],
                 title="Wordle Companion",
-                update_title=None)
+                update_title=None,
+                )
 
 app.css.config.serve_locally = True
+
+
+app.index_string = '''<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-1XTZ6F0JH1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-1XTZ6F0JH1', { 'anonymize_ip': true });
+        </script>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>'''
 
 wordle_words = pd.read_csv(
     'data/wordle_words_short.csv').sort_values(by='Frequency', ascending=False)
@@ -38,7 +67,7 @@ def create_guess_input(guess_number):
                 children=[
                     # dbc.Col(dbc.Input(id='letter'+str(i)+'_guess'+str(guess_number), placeholder='A',
                     dbc.Col(dbc.Input(id={'component': 'guess_input', 'letter_position': i, 'guess_number': guess_number}, placeholder='A',
-                                      type='text', size="lg", maxlength=1, value='',)) for i in range(5)
+                                      type='text', size="lg", maxlength=1, value='')) for i in range(5)
                 ],
                 justify='between', class_name='mb-1 g-2'
             ),
@@ -88,7 +117,7 @@ app.layout = html.Div(
 
                     dbc.Col(children=[
                         html.P(
-                            children='Enter your word guesses and color for each letter below, to show which words are still possible.'),
+                            children='Enter word guesses and colors below to see possible solutions.'),
                     ], width='auto', class_name='mb-3'),
 
                     justify='center'
@@ -104,13 +133,14 @@ app.layout = html.Div(
 
                         dbc.Col(
                             children=[
-                                dbc.Row(html.Div([html.H4('Remaining Words'), html.H6(' (Top 50 Shown)')]), className='mb-2'),
-                                      dbc.Alert([
+                                dbc.Row(html.Div([html.H4('Remaining Words'), html.H6(
+                                    ' (Top 50 Shown)')]), className='mb-2'),
+                                dbc.Alert([
                                           html.H4(
                                               format(wordle_words.shape[0], ','), id='num_words_remaining'),
                                           html.P(" possible words remaining")], color="secondary"),
-                                      html.Div(id='table1')
-                                      ],
+                                html.Div(id='table1')
+                            ],
                             class_name='col-12 col-md-6'
                         ),
                     ]),
@@ -142,7 +172,6 @@ def update_color(result_selector):
         return {'background-color': '#86888a', 'color': 'white'}
 
 
-# currently only connected to guess 1, needs to be updated
 @ app.callback(
     [Output('table1', 'children'), Output('num_words_remaining', 'children')],
     [Input({'component': 'guess_input', 'letter_position': ALL, 'guess_number': ALL}, 'value'),
