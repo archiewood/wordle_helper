@@ -29,8 +29,8 @@ app.index_string = '''<!DOCTYPE html>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-
-            gtag('config', 'G-1XTZ6F0JH1', { 'anonymize_ip': true });
+            
+            gtag('config', 'G-1XTZ6F0JH1', { 'anonymize_ip': false });
         </script>
         {%metas%}
         <title>{%title%}</title>
