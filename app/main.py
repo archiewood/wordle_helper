@@ -1,4 +1,5 @@
 # this seems to be a file to put the routes in
+from pydoc import classname
 from click import style
 import dash
 from dash import dcc, html, dash_table, Input, Output, State, MATCH, ALL
@@ -95,7 +96,9 @@ def create_guess_input(guess_number):
 
 app.layout = html.Div(
     children=[
-        dbc.NavbarSimple(
+        dbc.NavbarSimple(children=[
+            dbc.NavItem(dbc.NavLink('Why Wordle Companion?', href="https://archiewood.substack.com/p/how-to-win-wordle")),
+            dbc.NavItem(dbc.NavLink('Github', href="https://github.com/archiewood/wordle_helper")) ],
             brand="WORDLE COMPANION",
             brand_href="#",
             color="primary",
@@ -150,6 +153,10 @@ app.layout = html.Div(
             fluid='sm',
 
             className="dbc col-12 col-sm-8"
+        ),
+        html.Footer(
+            dbc.Row(
+                dbc.Col("Made with ❤️ in Toronto", width='auto', class_name='mb-1 mt-1'),justify='center'),className='bg-light'
         )
     ]
 )
