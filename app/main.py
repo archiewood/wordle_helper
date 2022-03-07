@@ -10,7 +10,7 @@ import logging
 from app.data_operations import *
 
 meta_tags = [
-    {"name": "viewport",
+    {   "name": "viewport",
         "content": "width=device-width, initial-scale=1"
      },
     {
@@ -35,7 +35,7 @@ meta_tags = [
     },
     {
         "property": "og:image",
-        "content": "favicon.ico"
+        "content": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/fbd080d8-eeb3-485c-9a13-87bcec77647e_603x599.png"
     },
     {
         "property": "twitter:title",
@@ -47,7 +47,7 @@ meta_tags = [
     },
     {
         "property": "twitter:image",
-        "content": "favicon.ico",
+        "content": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/fbd080d8-eeb3-485c-9a13-87bcec77647e_603x599.png",
     },
 ]
 
