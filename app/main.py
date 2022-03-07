@@ -161,8 +161,13 @@ app.layout = html.Div(
                 dbc.Row(
 
                     dbc.Col(children=[
-                        html.P(
-                            children='Enter word guesses and colors below to see possible solutions, and (NEW) which letters are most common in those solutions.'),
+                        dcc.Markdown(
+                            children=
+                            '''
+                            Enter word guesses and colors below to see possible solutions. 
+                            
+                            **NEW:** See which letters are most common in those solutions below.
+                            '''),
                     ], width='auto', class_name='mb-3'),
 
 
