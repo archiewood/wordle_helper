@@ -9,11 +9,52 @@ import pandas as pd
 import logging
 from app.data_operations import *
 
+meta_tags = [
+    {"name": "viewport",
+        "content": "width=device-width, initial-scale=1"
+     },
+    {
+        "name": "author",
+        "content": "Archie Wood"
+    },
+    {
+        "name": "description",
+        "content": "An app to help you win Wordle in fewer guesses.",
+    },
+    {
+        "property": "og:type",
+        "content": "website"
+    },
+    {
+        "property": "og:title",
+        "content": "Beat your friends at Wordle"
+    },
+    {
+        "property": "og:description",
+        "content": "An app to help you win Wordle in fewer guesses.",
+    },
+    {
+        "property": "og:image",
+        "content": "favicon.ico"
+    },
+    {
+        "property": "twitter:title",
+        "content": "Beat your friends at Wordle"
+    },
+    {
+        "property": "twitter:description",
+        "content": "An app to help you win Wordle in fewer guesses.",
+    },
+    {
+        "property": "twitter:image",
+        "content": "favicon.ico",
+    },
+]
+
 
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.SANDSTONE],
-                meta_tags=[{"name": "viewport",
-                            "content": "width=device-width, initial-scale=1"}],
+                meta_tags=meta_tags,
                 title="Wordle Companion",
                 update_title=None,
                 )
@@ -97,8 +138,9 @@ def create_guess_input(guess_number):
 app.layout = html.Div(
     children=[
         dbc.NavbarSimple(children=[
-            dbc.NavItem(dbc.NavLink('Why Wordle Companion?', href="https://archiewood.substack.com/p/how-to-win-wordle")),
-            dbc.NavItem(dbc.NavLink('Github', href="https://github.com/archiewood/wordle_helper")) ],
+            dbc.NavItem(dbc.NavLink('Why Wordle Companion?',
+                        href="https://archiewood.substack.com/p/how-to-win-wordle")),
+            dbc.NavItem(dbc.NavLink('Github', href="https://github.com/archiewood/wordle_helper"))],
             brand="WORDLE COMPANION",
             brand_href="#",
             color="primary",
@@ -120,8 +162,9 @@ app.layout = html.Div(
 
                     dbc.Col(children=[
                         html.P(
-                            children='Enter word guesses and colors below to see possible solutions.'),
+                            children='Enter word guesses and colors below to see possible solutions, and (NEW) which letters are most common in those solutions.'),
                     ], width='auto', class_name='mb-3'),
+
 
                     justify='center'
                 ),
@@ -136,13 +179,17 @@ app.layout = html.Div(
 
                         dbc.Col(
                             children=[
+
                                 dbc.Row(html.Div([html.H4('Remaining Words'), html.H6(
                                     ' (Top 50 Shown)')]), className='mb-2'),
                                 dbc.Alert([
                                           html.H4(
                                               format(wordle_words.shape[0], ','), id='num_words_remaining'),
                                           html.P(" possible words remaining")], color="secondary"),
-                                html.Div(id='table1')
+                                html.Div(id='table1'),
+                                dbc.Row(html.Div([html.H4('Top Letters in Words'), html.H6(
+                                    ' (Top 10 Shown)')]), className='mb-2'),
+                                html.Div(id='letters_table'),
                             ],
                             class_name='col-12 col-md-6'
                         ),
@@ -156,7 +203,7 @@ app.layout = html.Div(
         ),
         html.Footer(
             dbc.Row(
-                dbc.Col("Made with ❤️ in Toronto", width='auto', class_name='mb-1 mt-1'),justify='center'),className='bg-light'
+                dbc.Col("Made with ❤️ in Toronto", width='auto', class_name='mb-1 mt-1'), justify='center'), className='bg-light'
         )
     ]
 )
@@ -195,4 +242,23 @@ def update_words_remaining(guess_input, result_selector):
             guess.append(letter.lower())
 
     filtered_df = update_possible_words(wordle_words, guess, result_selector)
-    return [dbc.Table.from_dataframe(filtered_df.iloc[:, 0:1].head(50)), format(filtered_df.shape[0], ',')]
+    return [dbc.Table.from_dataframe(filtered_df.iloc[:, 0:1].head(50), striped=True), format(filtered_df.shape[0], ',')]
+
+
+@ app.callback(
+    Output('letters_table', 'children'),
+    [Input({'component': 'guess_input', 'letter_position': ALL, 'guess_number': ALL}, 'value'),
+     Input({'component': 'result_selector', 'letter_position': ALL, 'guess_number': ALL}, 'value')]
+)
+def update_letters_remaining(guess_input, result_selector):
+    current_word_list = wordle_words
+
+    guess = []
+    for letter in guess_input:
+        if letter == '':
+            guess.append('*')
+        else:
+            guess.append(letter.lower())
+
+    filtered_df = update_possible_words(wordle_words, guess, result_selector)
+    return dbc.Table.from_dataframe(count_most_frequent_letters(filtered_df).head(10), index=True, striped=True)
