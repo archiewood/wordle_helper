@@ -21,5 +21,12 @@ function loadfunc() {
     }
 };
 
+function trackinput() {
+    document.addEventListener("keyup", function () { 
+        analytics.track('Keystroke', {character: this.value});
+    })
+};
+
 
 loadfunc();
+trackinput();

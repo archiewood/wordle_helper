@@ -19,6 +19,7 @@ pandas = "*"
 dash = "*"
 dash-bootstrap-components = "*"
 waitress = "*"
+analytics-python = "*"
 
 [dev-packages]
 
