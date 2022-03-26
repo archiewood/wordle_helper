@@ -18,15 +18,21 @@ function loadfunc() {
                 document.getElementById(JSON.stringify(box[i][j])).addEventListener("keyup", function () { if (this.value.length > 0) { document.getElementById(JSON.stringify(box[i + 1][j])).focus() } });
             }
         }
+        // add segment keystroke tracking
+        for (let i = 0; i < 5; i++) {
+            for (let j = 1; j <= 5; j++) {
+                document.getElementById(JSON.stringify(box[i][j])).addEventListener("keyup", function (event) {
+                    analytics.track('Keystroke', {
+                        character: event.key,
+                        position: i,
+                        guess: j
+                    });
+                })
+            }
+        }
     }
 };
 
-function trackinput() {
-    document.addEventListener("keyup", function () { 
-        analytics.track('Keystroke', {character: this.value});
-    })
-};
 
 
 loadfunc();
-trackinput();
