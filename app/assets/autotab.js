@@ -33,6 +33,4 @@ function loadfunc() {
     }
 };
 
-
-
 loadfunc();

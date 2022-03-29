@@ -146,7 +146,9 @@ app.layout = html.Div(
         dbc.NavbarSimple(children=[
             dbc.NavItem(dbc.NavLink('Why Wordle Companion?',
                         href="https://archiewood.substack.com/p/how-to-win-wordle")),
-            dbc.NavItem(dbc.NavLink('Github', href="https://github.com/archiewood/wordle_helper"))],
+            dbc.NavItem(dbc.NavLink('Github', href="https://github.com/archiewood/wordle_helper")),
+            dbc.NavItem(dbc.NavLink('Request A Feature',
+                        href="https://research.typeform.com/to/FV3AUx2P"))],
             brand="WORDLE COMPANION",
             brand_href="#",
             color="primary",
@@ -169,9 +171,9 @@ app.layout = html.Div(
                     dbc.Col(children=[
                         dcc.Markdown(
                             children='''
-                            Enter word guesses and colors below to see possible solutions. 
+                            Enter guesses and colors below to see possible solutions. 
                             
-                            **NEW:** See which letters are most common in those solutions below.
+                            **Want more from Wordle Companion?** [Let me know](https://research.typeform.com/to/FV3AUx2P) how to improve it.
                             '''),
                     ], width='auto', class_name='mb-3'),
 
